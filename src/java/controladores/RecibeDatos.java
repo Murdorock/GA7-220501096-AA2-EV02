@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import static java.lang.System.out;
 import java.sql.*;
 
 /**
@@ -67,8 +66,13 @@ public class RecibeDatos extends HttpServlet {
         String ape = request.getParameter("Apellido");
         String cor = request.getParameter("Correo");
         String tel = request.getParameter("Telefono");
+        String btnReg = request.getParameter("btnRegistro");
+        String btnEli = request.getParameter("btnBorrado");
+        String btnAct = request.getParameter("btnActualizado");
+        String btnCon = request.getParameter("btnConsultas");
+        ResultSet rs;
         
-
+        if ("Registrar".equals(btnReg)) {
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
             
@@ -82,9 +86,67 @@ public class RecibeDatos extends HttpServlet {
         catch(Exception e){
             processRequest(request, response, "No se pudo completar el registro");
             //out.print("<h1>Error<h1>");
-            
+        } 
         }
+        else if ("Eliminar".equals(btnEli)) {
+            // Lógica para procesar el botón "Enviar"
+            try {
         
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            
+            conexion= DriverManager.getConnection(url,usuario,password);
+            statement= conexion.createStatement();
+            
+            statement.executeUpdate("DELETE FROM CLIENTES WHERE CEDULA = '"+ced+"'");
+            processRequest(request, response, "Cliente eliminado con exito");
+        }
+        catch (ClassNotFoundException | SQLException ex){
+                ex.printStackTrace();
+                }   
+        }
+            else if ("Actualizar".equals(btnAct)) {
+    try {
+        
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            
+            conexion= DriverManager.getConnection(url,usuario,password);
+            statement= conexion.createStatement();
+            
+            statement.executeUpdate("UPDATE CLIENTES SET NOMBRE = '"+nom+"' WHERE CEDULA = '"+ced+"'");
+            statement.executeUpdate("UPDATE CLIENTES SET APELLIDO = '"+ape+"' WHERE CEDULA = '"+ced+"'");
+            statement.executeUpdate("UPDATE CLIENTES SET CORREO = '"+cor+"' WHERE CEDULA = '"+ced+"'");
+            statement.executeUpdate("UPDATE CLIENTES SET TELEFONO = '"+tel+"' WHERE CEDULA = '"+ced+"'");             
+            processRequest(request, response, "Cliente actualizado con exito");
+
+        }
+        catch (ClassNotFoundException | SQLException ex){
+                ex.printStackTrace();
+                }
+        }
+        else if ("Consultar".equals(btnCon)) {
+            try {
+        
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            
+            conexion= DriverManager.getConnection(url,usuario,password);
+            statement= conexion.createStatement();
+                        
+            rs =statement.executeQuery("SELECT * FROM CLIENTES where CEDULA='"+ced+"'");
+            rs.next();
+            processRequest(request, response,"Resultado de la busqueda <br/>" + "ID: " + rs.getInt("IDCLIENTES")
+                    + "<br/>" + "CEDULA: " + rs.getString("CEDULA")+"<br/>"+ "NOMBRE: " + rs.getString("NOMBRE")
+                    +"<br/>"+ "APELLIDO: " + rs.getString("APELLIDO")+ "<br/>"+ "CORREO: " + rs.getString("CORREO") 
+                    + "<br/>"+ "TELEFONO: " + rs.getString("TELEFONO"));
+            }
+        catch (ClassNotFoundException | SQLException ex){
+                ex.printStackTrace();
+                }
+        }
+            else {
+            response.getWriter().println("Boton desconocido");
+        }
+
+         
     }
 
     /**
